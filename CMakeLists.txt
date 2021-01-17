@@ -3,4 +3,6 @@ project(bookstore)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(bookstore src/main.cpp)
+add_executable(bookstore
+        src/main.cpp
+        src/include/BPlusTree.cpp)
