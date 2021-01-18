@@ -1,1 +1,2 @@
-rm storage_*
+cd StorageFile
+rm -rf *
