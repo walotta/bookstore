@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(bookstore
         src/main.cpp
-        src/include/BPlusTree.hpp
-        src/include/FileStorage.hpp
-        src/include/StoragePool.hpp
+        src/include/BPlusTree.h
+        src/include/FileStorage.h
+        src/include/StoragePool.h
         src/BookManage.cpp
         src/BookManage.h
         src/UserManage.cpp
