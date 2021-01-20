@@ -17,4 +17,4 @@ add_executable(bookstore
         src/Log.cpp
         src/Log.h
         src/Finance.cpp
-        src/Finance.h)
+        src/Finance.h src/ErrorMessage.h)
