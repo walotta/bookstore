@@ -20,6 +20,21 @@ private:
     const string dir="StorageFile/";
     const string StorageFileName;
 
+    inline void fileOpen()
+    {
+        pool.open(dir+StorageFileName,fstream::in|fstream::out|ios::binary);
+        pool.seekg(0,ios::beg);
+        pool.read(reinterpret_cast<char*>(&WritePoint),sizeof(int));
+        pool.read(reinterpret_cast<char*>(&LastBlock),sizeof(int));
+    }
+    inline void fileClose()
+    {
+        pool.seekp(0,ios::beg);
+        pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
+        pool.write(reinterpret_cast<const char*>(&LastBlock),sizeof(int));
+        pool.close();
+    }
+
 public:
     StoragePool()=delete;
 
@@ -42,18 +57,20 @@ public:
             pool.read(reinterpret_cast<char*>(&WritePoint),sizeof(int));
             pool.read(reinterpret_cast<char*>(&LastBlock),sizeof(int));
         }
+        pool.close();
     }
 
     ~StoragePool()
     {
-        pool.seekp(0,ios::beg);
+        /*pool.seekp(0,ios::beg);
         pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
         pool.write(reinterpret_cast<const char*>(&LastBlock),sizeof(int));
-        pool.close();
+        pool.close();*/
     }
 
     int add(const T &block)
     {
+        fileOpen();
         int ans;
         if(WritePoint==-1)
         {
@@ -71,32 +88,40 @@ public:
             pool.write(reinterpret_cast<const char*>(&block),sizeof(T));
             WritePoint=tem;
         }
+        fileClose();
         return ans;
     }
 
     void remove(int id)
     {
+        fileOpen();
         pool.seekp(base+id*sizeof(T),ios::beg);
         pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
+        fileClose();
         WritePoint=id;
     }
 
     void update(int id,const T &block)
     {
+        fileOpen();
         pool.seekp(base+id*sizeof(T),ios::beg);
         pool.write(reinterpret_cast<const char*>(&block),sizeof(T));
+        fileClose();
     }
 
     T get(int id)
     {
+        fileOpen();
         T tem;
         pool.seekg(base+id*sizeof(T),ios::beg);
         pool.read(reinterpret_cast<char*>(&tem),sizeof(T));
+        fileClose();
         return tem;
     }
 
     void clearAll()
     {
+        fileOpen();
         pool.close();
         pool.open(dir+StorageFileName,ios::out|ios::binary);
         pool.close();
@@ -106,10 +131,13 @@ public:
         pool.seekp(0,ios::beg);
         pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
         pool.write(reinterpret_cast<const char*>(&LastBlock),sizeof(int));
+        fileClose();
     }
 
     int tellSpace()
     {
+        fileOpen();
+        fileClose();
         return LastBlock;
     }
 };
