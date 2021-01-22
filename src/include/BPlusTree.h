@@ -5,6 +5,8 @@
 #ifndef BOOKSTORE_BPLUSTREE_H
 #define BOOKSTORE_BPLUSTREE_H
 
+#define No_Block_Merge_off
+
 #include <vector>
 #include <cstring>
 #include "StoragePool.h"
@@ -326,7 +328,7 @@ private:
         }
     }
 
-    //搜索删除块，在返回后由父节点判断是否需要合并
+    //搜索删除，在返回后由父节点判断是否需要合并
     void dp_remove(int now,const MyString &key, const int &id)
     {
         BStore nowBlock=storage->get(now);
@@ -339,13 +341,17 @@ private:
                 if(key<nowBlock.storeKey[i])break;
             }
             i--;
+            if(i==-1)
+            {
+                throw error("BPT remove not found");
+            }
             bool finish=false;
             if(nowBlock.storeKey[i]==key)
             {
                 int j;
                 for(j=i;j>=0;j--)
                 {
-                    if(nowBlock.storeId[j]==id)
+                    if(nowBlock.storeId[j]==id&&nowBlock.storeKey[j]==key)
                     {
                         finish=true;
                         break;
@@ -354,7 +360,6 @@ private:
                 if(finish)
                 {
                     //删除点在当前块
-                    storage->remove(nowBlock.storeId[j]);
                     for(int k=j;k<nowBlock.storeNumber-1;k++)
                     {
                         nowBlock.storeId[k]=nowBlock.storeId[k+1];
@@ -370,14 +375,13 @@ private:
                     int f_point=nowBlock.FrontLeaf;
                     while(true)
                     {
-                        for(int k=f.FrontLeaf-1;k>=0;k--)
+                        for(int k=f.storeNumber-1;k>=0;k--)
                         {
                             if(f.storeKey[k]!=key)throw error("BPT remove not found");
                             else
                             {
                                 if(f.storeId[k]==id)
                                 {
-                                    storage->remove(f.storeId[k]);
                                     for(int ii=k;ii<f.storeNumber-1;ii++)
                                     {
                                         f.storeId[ii]=f.storeId[ii+1];
@@ -420,13 +424,20 @@ private:
             BStore son=storage->get(nowBlock.storeId[i]);
             nowBlock.storeKey[i]=son.storeKey[0];
             const int _min=Size/2;
-            if(son.storeNumber<_min)
+
+#ifdef No_Block_Merge
+            storage->update(now,nowBlock);
+            if(now==root)rootBlock=nowBlock;
+            return;
+#endif
+
+            if(son.storeNumber<_min && nowBlock.storeNumber>1)
             {
                 //需要扩容
                 int direction=1;
                 if(i==nowBlock.storeNumber-1)direction=-1;
-                BStore neigh=storage->get(i+direction);
-                if(neigh.storeNumber-1<_min)
+                BStore neigh=storage->get(nowBlock.storeId[i+direction]);
+                if(neigh.storeNumber<_min)
                 {
                     //合并
                     BStore new_block;
@@ -443,7 +454,7 @@ private:
                         {
                             //取左邻居
                             new_block.NextLeaf=son.NextLeaf;
-                            new_block.FrontLeaf=son.FrontLeaf;
+                            new_block.FrontLeaf=neigh.FrontLeaf;
                         }
                     }else
                     {
@@ -451,8 +462,6 @@ private:
                     }
                     //执行合并操作
                     new_block.storeNumber=son.storeNumber+neigh.storeNumber;
-                    //todo
-                    // 执行合并
                     if(direction==1)
                     {
                         for(int j=0;j<new_block.storeNumber;j++)
@@ -482,9 +491,8 @@ private:
                             }
                         }
                     }
-
-                    storage->remove(i);
-                    storage->remove(i+direction);
+                    storage->remove(nowBlock.storeId[i]);
+                    storage->remove(nowBlock.storeId[i+direction]);
                     int newId=storage->add(new_block);
                     if(direction==1)
                     {
@@ -503,22 +511,25 @@ private:
                         nowBlock.storeNumber--;
                     }
                     //修改相邻元素的链表结构
-                    if(new_block.FrontLeaf==-1)
+                    if(new_block.IfLeaves)
                     {
-                        head=newId;
-                    }else
-                    {
-                        BStore tem=storage->get(new_block.FrontLeaf);
-                        tem.NextLeaf=newId;
-                        storage->update(new_block.FrontLeaf,tem);
-                        if(new_block.FrontLeaf==root)rootBlock=tem;
-                    }
-                    if(new_block.NextLeaf!=-1)
-                    {
-                        BStore tem=storage->get(new_block.NextLeaf);
-                        tem.FrontLeaf=newId;
-                        storage->update(new_block.NextLeaf,tem);
-                        if(new_block.NextLeaf==root)rootBlock=tem;
+                        if(new_block.FrontLeaf==-1)
+                        {
+                            head=newId;
+                        }else
+                        {
+                            BStore tem=storage->get(new_block.FrontLeaf);
+                            tem.NextLeaf=newId;
+                            storage->update(new_block.FrontLeaf,tem);
+                            if(new_block.FrontLeaf==root)rootBlock=tem;
+                        }
+                        if(new_block.NextLeaf!=-1)
+                        {
+                            BStore tem=storage->get(new_block.NextLeaf);
+                            tem.FrontLeaf=newId;
+                            storage->update(new_block.NextLeaf,tem);
+                            if(new_block.NextLeaf==root)rootBlock=tem;
+                        }
                     }
                 }else
                 {
@@ -537,10 +548,10 @@ private:
                         nowBlock.storeKey[i+direction]=neigh.storeKey[0];
                     }else
                     {
-                        for(int j=0;j<son.storeNumber;j++)
+                        for(int j=son.storeNumber;j>0;j--)
                         {
-                            son.storeKey[j+1]=son.storeKey[j];
-                            son.storeId[j+1]=son.storeId[j];
+                            son.storeKey[j]=son.storeKey[j-1];
+                            son.storeId[j]=son.storeId[j-1];
                         }
                         son.storeNumber++;
                         son.storeKey[0]=neigh.storeKey[neigh.storeNumber-1];
@@ -548,6 +559,8 @@ private:
                         neigh.storeNumber--;
                         nowBlock.storeKey[i]=son.storeKey[0];
                     }
+                    storage->update(nowBlock.storeId[i],son);
+                    storage->update(nowBlock.storeId[i+direction],neigh);
                 }
             }
             storage->update(now,nowBlock);
@@ -566,6 +579,11 @@ private:
                 if(key<nowBlock.storeKey[i])break;
             }
             i--;
+            if(i==-1)
+            {
+                vector<int> ans;
+                return ans;
+            }
             if(nowBlock.storeKey[i]==key)
             {
                 vector<int> ans;
@@ -713,7 +731,6 @@ public:
                             rootBlock.storeKey[j-numberOfNew]=rootBlock.storeKey[j];
                         }
                         rootBlock.storeNumber=rootBlock.storeNumber-numberOfNew;
-                        //todo
 
                         storage->update(root,rootBlock);
                         int ans=storage->add(new_Store);
