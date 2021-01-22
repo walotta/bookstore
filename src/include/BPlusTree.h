@@ -262,7 +262,7 @@ private:
             }else
             {
                 //处理裂块
-                BStore temm=storage->get(nowBlock.storeId[i+1]);
+                BStore temm=storage->get(nowBlock.storeId[i]);
                 MyString newKey=temm.storeKey[0];
                 if(nowBlock.storeNumber<Size)
                 {
@@ -280,8 +280,7 @@ private:
                 }else
                 {
                     int numberOfNew=Size/2;
-                    int oldId=nowBlock.storeId[i];
-                    nowBlock.storeId[i]=newId;
+                    //nowBlock.storeId[i]=newId;
                     BStore new_Store;
                     new_Store.IfLeaves=false;
                     new_Store.storeNumber=numberOfNew;
@@ -290,31 +289,31 @@ private:
                         new_Store.storeKey[j]=nowBlock.storeKey[j];
                         new_Store.storeId[j]=nowBlock.storeId[j];
                     }
-                    for(int j=numberOfNew;j<Size;j++)
+                    for(int j=numberOfNew;j<nowBlock.storeNumber;j++)
                     {
                         nowBlock.storeId[j-numberOfNew]=nowBlock.storeId[j];
                         nowBlock.storeKey[j-numberOfNew]=nowBlock.storeKey[j];
                     }
-                    nowBlock.storeNumber=Size-numberOfNew;
-                    if(i+1<numberOfNew)
+                    nowBlock.storeNumber=nowBlock.storeNumber-numberOfNew;
+                    if(i<numberOfNew)//todo change
                     {
-                        for(int j=i+1;j<numberOfNew;j++)
+                        for(int j=numberOfNew;j>i;j--)
                         {
-                            new_Store.storeId[j+1]=new_Store.storeId[j];
-                            new_Store.storeKey[j+1]=new_Store.storeKey[j];
+                            new_Store.storeId[j]=new_Store.storeId[j-1];
+                            new_Store.storeKey[j]=new_Store.storeKey[j-1];
                         }
-                        new_Store.storeKey[i+1]=newKey;
-                        new_Store.storeId[i+1]=oldId;
+                        new_Store.storeKey[i+1]=newKey;//todo change
+                        new_Store.storeId[i]=newId;
                         new_Store.storeNumber++;
                     }else
                     {
-                        for(int j=i+1-numberOfNew;j<nowBlock.storeNumber;j++)
+                        for(int j=nowBlock.storeNumber;j>i-numberOfNew;j--)
                         {
-                            nowBlock.storeId[j+1]=nowBlock.storeId[j];
-                            nowBlock.storeKey[j+1]=nowBlock.storeKey[j];
+                            nowBlock.storeId[j]=nowBlock.storeId[j-1];
+                            nowBlock.storeKey[j]=nowBlock.storeKey[j-1];
                         }
                         nowBlock.storeKey[i+1-numberOfNew]=newKey;
-                        nowBlock.storeId[i+1-numberOfNew]=oldId;
+                        nowBlock.storeId[i-numberOfNew]=newId;
                         nowBlock.storeNumber++;
                     }
                     storage->update(now,nowBlock);
@@ -327,40 +326,236 @@ private:
         }
     }
 
-    //返回是否需要合并块，返回true需要合并
-    bool dp_remove(int now,const MyString &key, const int &id)
+    //搜索删除块，在返回后由父节点判断是否需要合并
+    void dp_remove(int now,const MyString &key, const int &id)
     {
         BStore nowBlock=storage->get(now);
         if(nowBlock.IfLeaves)
         {
             //叶子节点
-            for(int i=0;i<nowBlock.storeNumber;i++)
+            int i=0;
+            for(i=0;i<nowBlock.storeNumber;i++)
             {
-                if(nowBlock.storeId[i]==id&&nowBlock.storeKey[i]==key)
+                if(key<nowBlock.storeKey[i])break;
+            }
+            i--;
+            bool finish=false;
+            if(nowBlock.storeKey[i]==key)
+            {
+                int j;
+                for(j=i;j>=0;j--)
                 {
-                    for(int j=i+1;j<nowBlock.storeNumber;j++)
+                    if(nowBlock.storeId[j]==id)
                     {
-                        nowBlock.storeKey[j-1]=nowBlock.storeKey[j];
-                        nowBlock.storeId[j-1]=nowBlock.storeId[j];
+                        finish=true;
+                        break;
+                    }
+                }
+                if(finish)
+                {
+                    //删除点在当前块
+                    storage->remove(nowBlock.storeId[j]);
+                    for(int k=j;k<nowBlock.storeNumber-1;k++)
+                    {
+                        nowBlock.storeId[k]=nowBlock.storeId[k+1];
+                        nowBlock.storeKey[k]=nowBlock.storeKey[k+1];
                     }
                     nowBlock.storeNumber--;
-                    if(nowBlock.storeNumber==0)
+                    storage->update(now,nowBlock);
+                    if(now==root)rootBlock=nowBlock;
+                }else
+                {
+                    //删除点在前面块
+                    BStore f=storage->get(nowBlock.FrontLeaf);
+                    int f_point=nowBlock.FrontLeaf;
+                    while(true)
                     {
-                        storage->remove(root);
-                        root=-1;
-                    }else storage->update(now,nowBlock);
-                    return false;
+                        for(int k=f.FrontLeaf-1;k>=0;k--)
+                        {
+                            if(f.storeKey[k]!=key)throw error("BPT remove not found");
+                            else
+                            {
+                                if(f.storeId[k]==id)
+                                {
+                                    storage->remove(f.storeId[k]);
+                                    for(int ii=k;ii<f.storeNumber-1;ii++)
+                                    {
+                                        f.storeId[ii]=f.storeId[ii+1];
+                                        f.storeKey[ii]=f.storeKey[ii+1];
+                                    }
+                                    f.storeNumber--;
+                                    storage->update(f_point,f);
+                                    if(f_point==root)rootBlock=f;
+                                    finish=true;
+                                    break;
+                                }
+                            }
+                        }
+                        if(finish)
+                        {
+                            break;
+                        }else if(f.FrontLeaf==-1)
+                        {
+                            throw error("BPT remove not found");
+                        }else
+                        {
+                            f_point=f.FrontLeaf;
+                            f=storage->get(f_point);
+                        }
+                    }
                 }
+            }else
+            {
+                throw error("BPT remove not found");
             }
-            throw error("BPT remove not found");
         }else
         {
-            //非叶子节点
-            //todo
+            //不是叶子节点
+            int i=0;
+            for(i=0;i<nowBlock.storeNumber-1;i++)
+            {
+                if(key<nowBlock.storeKey[i+1])break;
+            }
+            dp_remove(nowBlock.storeId[i],key,id);
+            BStore son=storage->get(nowBlock.storeId[i]);
+            nowBlock.storeKey[i]=son.storeKey[0];
+            const int _min=Size/2;
+            if(son.storeNumber<_min)
+            {
+                //需要扩容
+                int direction=1;
+                if(i==nowBlock.storeNumber-1)direction=-1;
+                BStore neigh=storage->get(i+direction);
+                if(neigh.storeNumber-1<_min)
+                {
+                    //合并
+                    BStore new_block;
+                    if(son.IfLeaves)
+                    {
+                        //子节点是叶子节点，维护链表
+                        new_block.IfLeaves=true;
+                        if(direction==1)
+                        {
+                            //取右邻居
+                            new_block.NextLeaf=neigh.NextLeaf;
+                            new_block.FrontLeaf=son.FrontLeaf;
+                        }else
+                        {
+                            //取左邻居
+                            new_block.NextLeaf=son.NextLeaf;
+                            new_block.FrontLeaf=son.FrontLeaf;
+                        }
+                    }else
+                    {
+                        new_block.IfLeaves=false;
+                    }
+                    //执行合并操作
+                    new_block.storeNumber=son.storeNumber+neigh.storeNumber;
+                    //todo
+                    // 执行合并
+                    if(direction==1)
+                    {
+                        for(int j=0;j<new_block.storeNumber;j++)
+                        {
+                            if(j<son.storeNumber)
+                            {
+                                new_block.storeId[j]=son.storeId[j];
+                                new_block.storeKey[j]=son.storeKey[j];
+                            }else
+                            {
+                                new_block.storeId[j]=neigh.storeId[j-son.storeNumber];
+                                new_block.storeKey[j]=neigh.storeKey[j-son.storeNumber];
+                            }
+                        }
+                    }else
+                    {
+                        for(int j=0;j<new_block.storeNumber;j++)
+                        {
+                            if(j<neigh.storeNumber)
+                            {
+                                new_block.storeId[j]=neigh.storeId[j];
+                                new_block.storeKey[j]=neigh.storeKey[j];
+                            }else
+                            {
+                                new_block.storeId[j]=son.storeId[j-neigh.storeNumber];
+                                new_block.storeKey[j]=son.storeKey[j-neigh.storeNumber];
+                            }
+                        }
+                    }
+
+                    storage->remove(i);
+                    storage->remove(i+direction);
+                    int newId=storage->add(new_block);
+                    if(direction==1)
+                    {
+                        for(int j=i+2;j<nowBlock.storeNumber;j++)
+                        {
+                            nowBlock.storeKey[j-1]=nowBlock.storeKey[j];
+                            nowBlock.storeId[j-1]=nowBlock.storeId[j];
+                        }
+                        nowBlock.storeKey[i]=new_block.storeKey[0];
+                        nowBlock.storeId[i]=newId;
+                        nowBlock.storeNumber--;
+                    }else
+                    {
+                        nowBlock.storeKey[i-1]=new_block.storeKey[0];
+                        nowBlock.storeId[i-1]=newId;
+                        nowBlock.storeNumber--;
+                    }
+                    //修改相邻元素的链表结构
+                    if(new_block.FrontLeaf==-1)
+                    {
+                        head=newId;
+                    }else
+                    {
+                        BStore tem=storage->get(new_block.FrontLeaf);
+                        tem.NextLeaf=newId;
+                        storage->update(new_block.FrontLeaf,tem);
+                        if(new_block.FrontLeaf==root)rootBlock=tem;
+                    }
+                    if(new_block.NextLeaf!=-1)
+                    {
+                        BStore tem=storage->get(new_block.NextLeaf);
+                        tem.FrontLeaf=newId;
+                        storage->update(new_block.NextLeaf,tem);
+                        if(new_block.NextLeaf==root)rootBlock=tem;
+                    }
+                }else
+                {
+                    //领养
+                    if(direction==1)
+                    {
+                        son.storeId[son.storeNumber]=neigh.storeId[0];
+                        son.storeKey[son.storeNumber]=neigh.storeKey[0];
+                        son.storeNumber++;
+                        for(int j=1;j<neigh.storeNumber;j++)
+                        {
+                            neigh.storeKey[j-1]=neigh.storeKey[j];
+                            neigh.storeId[j-1]=neigh.storeId[j];
+                        }
+                        neigh.storeNumber--;
+                        nowBlock.storeKey[i+direction]=neigh.storeKey[0];
+                    }else
+                    {
+                        for(int j=0;j<son.storeNumber;j++)
+                        {
+                            son.storeKey[j+1]=son.storeKey[j];
+                            son.storeId[j+1]=son.storeId[j];
+                        }
+                        son.storeNumber++;
+                        son.storeKey[0]=neigh.storeKey[neigh.storeNumber-1];
+                        son.storeId[0]=neigh.storeId[neigh.storeNumber-1];
+                        neigh.storeNumber--;
+                        nowBlock.storeKey[i]=son.storeKey[0];
+                    }
+                }
+            }
+            storage->update(now,nowBlock);
+            if(now==root)rootBlock=nowBlock;
         }
     }
 
-    std::vector<int> dp_find(int now,const MyString &key)
+    std::vector<int> dp_find(int now,const MyString &key)const
     {
         BStore nowBlock=storage->get(now);
         if(nowBlock.IfLeaves)
@@ -460,7 +655,7 @@ public:
             if(newId==-1)return;
             else
             {
-                if(rootBlock.IfLeaves)
+                /*if(rootBlock.IfLeaves)
                 {
                     //仅有一个节点的裂块
                     BStore new_head;
@@ -496,6 +691,13 @@ public:
                         return;
                     }else
                     {
+                        int i=0;
+                        for(i=0;i<rootBlock.storeNumber-1;i++)
+                        {
+                            if(key<rootBlock.storeKey[i+1])break;
+                        }
+                        BStore temm=storage->get(rootBlock.storeId[i]);
+                        MyString newKey=temm.storeKey[0];
                         int numberOfNew=Size/2;
                         BStore new_Store;
                         new_Store.IfLeaves=false;
@@ -505,12 +707,14 @@ public:
                             new_Store.storeKey[j]=rootBlock.storeKey[j];
                             new_Store.storeId[j]=rootBlock.storeId[j];
                         }
-                        for(int j=numberOfNew;j<Size;j++)
+                        for(int j=numberOfNew;j<rootBlock.storeNumber;j++)
                         {
                             rootBlock.storeId[j-numberOfNew]=rootBlock.storeId[j];
                             rootBlock.storeKey[j-numberOfNew]=rootBlock.storeKey[j];
                         }
-                        rootBlock.storeNumber=Size-numberOfNew;
+                        rootBlock.storeNumber=rootBlock.storeNumber-numberOfNew;
+                        //todo
+
                         storage->update(root,rootBlock);
                         int ans=storage->add(new_Store);
                         BStore new_root;
@@ -523,46 +727,70 @@ public:
                         root=storage->add(new_root);
                         rootBlock=new_root;
                     }
-                }
+                }*/
+                BStore new_head;
+                BStore temm=storage->get(newId);
+                new_head.IfLeaves=false;
+                new_head.storeNumber=2;
+                new_head.storeKey[0]=temm.storeKey[0];
+                new_head.storeId[0]=newId;
+                new_head.storeKey[1]=rootBlock.storeKey[0];
+                new_head.storeId[1]=root;
+                root=storage->add(new_head);
+                rootBlock=new_head;
             }
         }
     }
 
     void remove(const string &key, const int &id)
     {
-        if(root==-1)
+        //不完全，对于重复key的块合并不完整
+        /*bool check_flag=false;
+        vector<int> check;
+        check=find(key);
+        for(auto it:check)
         {
-            throw error("BPT is empty cannot remove");
+            if(it==id)
+            {
+                check_flag=true;
+                break;
+            }
+        }
+        if(!check_flag)throw error("BPT remove not found");*/
+
+        if(rootBlock.IfLeaves)
+        {
+            //根节点是叶子节点
+            for(int i=0;i<rootBlock.storeNumber;i++)
+            {
+                if(rootBlock.storeId[i]==id&&rootBlock.storeKey[i]==key)
+                {
+                    for(int j=i+1;j<rootBlock.storeNumber;j++)
+                    {
+                        rootBlock.storeKey[j-1]=rootBlock.storeKey[j];
+                        rootBlock.storeId[j-1]=rootBlock.storeId[j];
+                    }
+                    rootBlock.storeNumber--;
+                    storage->update(root,rootBlock);
+                    return;
+                }
+            }
+            throw error("BPT remove not found");
         }else
         {
-            if(rootBlock.IfLeaves)
+            //树高度高于1
+            dp_remove(root, key, id);
+            if(rootBlock.storeNumber==1)
             {
-                for(int i=0;i<rootBlock.storeNumber;i++)
-                {
-                    if(rootBlock.storeId[i]==id&&rootBlock.storeKey[i]==key)
-                    {
-                        for(int j=i+1;j<rootBlock.storeNumber;j++)
-                        {
-                            rootBlock.storeKey[j-1]=rootBlock.storeKey[j];
-                            rootBlock.storeId[j-1]=rootBlock.storeId[j];
-                        }
-                        rootBlock.storeNumber--;
-                        storage->update(root,rootBlock);
-                        return;
-                    }
-                }
-                throw error("BPT remove not found");
-            }else
-            {
-                if(dp_remove(root, key, id))
-                {
-                    //需要在根节点做合并
-                }
+                int new_root=rootBlock.storeId[0];
+                storage->remove(root);
+                root=new_root;
+                rootBlock=storage->get(root);
             }
         }
     }
 
-    std::vector<int> find(const string &key)
+    std::vector<int> find(const string &key)const
     {
         if(root==-1)
         {
@@ -596,10 +824,62 @@ public:
                 cout<<KS.storeId[i]<<' ';
             }
             cout<<endl;
+            cout<<"NextLeaf   "<<KS.NextLeaf<<endl;
+            cout<<"FrontLeaf  "<<KS.FrontLeaf<<endl;
             cout<<endl;
             k=KS.NextLeaf;
         }
         cout<<"[debug finish]"<<endl;
     }
+
+    void debug(int id)
+    {
+        cout<<"["<<id<<" block]"<<endl;
+        BStore KS=storage->get(id);
+        cout<<id<<' '<<KS.storeNumber<<endl;
+        cout<<"Key:"<<' ';
+        for(int i=0;i<KS.storeNumber;i++)
+        {
+            cout<<KS.storeKey[i]<<' ';
+        }
+        cout<<endl;
+        cout<<"Id :"<<' ';
+        for(int i=0;i<KS.storeNumber;i++)
+        {
+            cout<<KS.storeId[i]<<' ';
+        }
+        cout<<endl;
+        cout<<endl;
+        cout<<"["<<id<<" block finished]"<<endl;
+    }
+
+    void debugRoot()
+    {
+        cout<<"[root block]"<<endl;
+        BStore KS=storage->get(root);
+        cout<<root<<' '<<KS.storeNumber<<endl;
+        cout<<"Key:"<<' ';
+        for(int i=0;i<KS.storeNumber;i++)
+        {
+            cout<<KS.storeKey[i]<<' ';
+        }
+        cout<<endl;
+        cout<<"Id :"<<' ';
+        for(int i=0;i<KS.storeNumber;i++)
+        {
+            cout<<KS.storeId[i]<<' ';
+        }
+        cout<<endl;
+        cout<<endl;
+        cout<<"[root block finished]"<<endl;
+    }
+
+    /*void ClearBpt()
+    {
+        storage->clearAll();
+        assist->clearAll();
+        root=-1;
+        head=-1;
+    }*/
 };
 #endif //BOOKSTORE_BPLUSTREE_H
