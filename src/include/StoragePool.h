@@ -9,14 +9,14 @@
 #include <fstream>
 using namespace std;
 
-template<class T>
+template<class T,class extraBlock>
 class StoragePool
 {
 private:
     int WritePoint=-1;//块编号从0开始，-1说明需要写入新块
     int LastBlock=-1;//文件中的最后一块
     fstream pool;
-    const int base=2*sizeof(int);
+    const int base=2*sizeof(int)+sizeof(extraBlock);
     const string dir="StorageFile/";
     const string StorageFileName;
 
@@ -51,6 +51,8 @@ public:
             LastBlock=-1;
             pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
             pool.write(reinterpret_cast<const char*>(&LastBlock),sizeof(int));
+            extraBlock tem;
+            pool.write(reinterpret_cast<const char*>(&tem),sizeof(extraBlock));
         }else
         {
             pool.seekg(0,ios::beg);
@@ -139,6 +141,24 @@ public:
         fileOpen();
         fileClose();
         return LastBlock;
+    }
+
+    extraBlock readExtraBlock()
+    {
+        fileOpen();
+        pool.seekg(2*sizeof(int),ios::beg);
+        extraBlock tem;
+        pool.read(reinterpret_cast<char*>(&tem),sizeof(extraBlock));
+        fileClose();
+        return tem;
+    }
+
+    void writeExtraBlock(const extraBlock& o)
+    {
+        fileOpen();
+        pool.seekp(2*sizeof(int),ios::beg);
+        pool.write(reinterpret_cast<const char*>(&o),sizeof(extraBlock));
+        fileClose();
     }
 };
 

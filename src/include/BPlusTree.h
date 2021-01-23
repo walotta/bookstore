@@ -99,6 +99,13 @@ private:
     const string name;
     int root=-1;
     int head=-1;
+    class assistStore
+    {
+    public:
+        bool used=false;
+        int rootStorage;
+        int headStorage;
+    };
     class BStore
     {
     public:
@@ -110,8 +117,7 @@ private:
         MyString storeKey[Size];
     };
     BStore rootBlock;
-    StoragePool<BStore>* storage;
-    StoragePool<int>* assist;
+    StoragePool<BStore,assistStore>* storage;
 
     //返回是否需要裂块，需要返回裂块后的新id值
     int dp_insert(int now,MyString key, const int &id){
@@ -627,28 +633,33 @@ public:
     {
         string headString="BptOf";
         string assistHead="AssistBptOf";
-        storage=new StoragePool<BStore>(headString+name);
-        assist=new StoragePool<int>(assistHead+name);
-        if(assist->tellSpace()==-1)
+        storage=new StoragePool<BStore,assistStore>(headString+name);
+        assistStore ass;
+        ass=storage->readExtraBlock();
+        if(!ass.used)
         {
             root=-1;
             head=-1;
-            assist->add(root);
-            assist->add(head);
+            ass.rootStorage=root;
+            ass.headStorage=head;
+            ass.used=true;
+            storage->writeExtraBlock(ass);
         }else
         {
-            root=assist->get(0);
-            head=assist->get(1);
+            root=ass.rootStorage;
+            head=ass.headStorage;
             rootBlock=storage->get(root);
         }
     }
 
     ~BPlusTree()
     {
-        assist->update(0,root);
-        assist->update(1,head);
+        assistStore ass;
+        ass.headStorage=head;
+        ass.rootStorage=root;
+        ass.used=true;
+        storage->writeExtraBlock(ass);
         delete storage;
-        delete assist;
     }
 
     void insert(const string &key, const int &id)
@@ -819,6 +830,7 @@ public:
         }
     }
 
+private:
     void debug()
     {
         cout<<endl<<"[debug]"<<endl;
