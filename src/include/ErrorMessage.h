@@ -12,7 +12,9 @@ class error: public std::exception
 private:
     string message;
 public:
-    explicit error(string mes):message(mes) {}
+    explicit error(const string &mes):message(mes) {}
+    //error(const error &o):message(o.message) {}
     string what(){return message;}
+    string get()const{return message;}
 };
 #endif //BOOKSTORE_ERRORMESSAGE_H

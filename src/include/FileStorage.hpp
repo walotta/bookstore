@@ -1,8 +1,0 @@
-//
-// Created by wzj on 2021/1/18.
-//
-
-#ifndef BOOKSTORE_FILESTORAGE_H
-#define BOOKSTORE_FILESTORAGE_H
-
-#endif //BOOKSTORE_FILESTORAGE_H

@@ -6,6 +6,7 @@
 #define BOOKSTORE_BPLUSTREE_H
 
 #define No_Block_Merge_off
+#define Debug_Mode_off
 
 #include <vector>
 #include <cstring>
@@ -303,14 +304,14 @@ private:
                         nowBlock.storeKey[j-numberOfNew]=nowBlock.storeKey[j];
                     }
                     nowBlock.storeNumber=nowBlock.storeNumber-numberOfNew;
-                    if(i<numberOfNew)//todo change
+                    if(i<numberOfNew)
                     {
                         for(int j=numberOfNew;j>i;j--)
                         {
                             new_Store.storeId[j]=new_Store.storeId[j-1];
                             new_Store.storeKey[j]=new_Store.storeKey[j-1];
                         }
-                        new_Store.storeKey[i+1]=newKey;//todo change
+                        new_Store.storeKey[i+1]=newKey;
                         new_Store.storeId[i]=newId;
                         new_Store.storeNumber++;
                     }else
@@ -432,7 +433,7 @@ private:
             const int _min=Size/2;
 
 #ifdef No_Block_Merge
-            storage->update(now,nowBlock);
+            bptStorage->update(now,nowBlock);
             if(now==root)rootBlock=nowBlock;
             return;
 #endif
@@ -631,8 +632,7 @@ public:
     BPlusTree()=delete;
     explicit BPlusTree(const string& _name):name(_name)
     {
-        string headString="BptOf";
-        string assistHead="AssistBptOf";
+        string headString="BptOf_";
         storage=new StoragePool<BStore,assistStore>(headString+name);
         assistStore ass;
         ass=storage->readExtraBlock();
@@ -688,14 +688,14 @@ public:
                 {
                     //仅有一个节点的裂块
                     BStore new_head;
-                    BStore temm=storage->get(newId);
+                    BStore temm=bptStorage->get(newId);
                     new_head.IfLeaves=false;
                     new_head.storeNumber=2;
                     new_head.storeKey[0]=temm.storeKey[0];
                     new_head.storeId[0]=newId;
                     new_head.storeKey[1]=rootBlock.storeKey[0];
                     new_head.storeId[1]=root;
-                    root=storage->add(new_head);
+                    root=bptStorage->add(new_head);
                     rootBlock=new_head;
                 }else
                 {
@@ -714,9 +714,9 @@ public:
                         }
                         rootBlock.storeNumber++;
                         rootBlock.storeId[i]=newId;
-                        BStore temm=storage->get(rootBlock.storeId[i+1]);
+                        BStore temm=bptStorage->get(rootBlock.storeId[i+1]);
                         rootBlock.storeKey[i+1]=temm.storeKey[0];
-                        storage->update(root,rootBlock);
+                        bptStorage->update(root,rootBlock);
                         return;
                     }else
                     {
@@ -725,7 +725,7 @@ public:
                         {
                             if(key<rootBlock.storeKey[i+1])break;
                         }
-                        BStore temm=storage->get(rootBlock.storeId[i]);
+                        BStore temm=bptStorage->get(rootBlock.storeId[i]);
                         MyString newKey=temm.storeKey[0];
                         int numberOfNew=Size/2;
                         BStore new_Store;
@@ -743,8 +743,8 @@ public:
                         }
                         rootBlock.storeNumber=rootBlock.storeNumber-numberOfNew;
 
-                        storage->update(root,rootBlock);
-                        int ans=storage->add(new_Store);
+                        bptStorage->update(root,rootBlock);
+                        int ans=bptStorage->add(new_Store);
                         BStore new_root;
                         new_root.storeNumber=2;
                         new_root.IfLeaves=false;
@@ -752,7 +752,7 @@ public:
                         new_root.storeKey[0]=new_Store.storeKey[0];
                         new_root.storeKey[1]=rootBlock.storeKey[0];
                         new_root.storeId[1]=root;
-                        root=storage->add(new_root);
+                        root=bptStorage->add(new_root);
                         rootBlock=new_root;
                     }
                 }*/
@@ -830,7 +830,23 @@ public:
         }
     }
 
-private:
+    std::vector<int> giveAllStorage()const
+    {
+        vector<int> ans;
+        BStore tem=storage->get(head);
+        while(true)
+        {
+            for(int i=0;i<tem.storeNumber;i++)
+            {
+                ans.push_back(tem.storeId[i]);
+            }
+            if(tem.NextLeaf==-1)break;
+            else tem=storage->get(tem.NextLeaf);
+        }
+        return ans;
+    }
+
+#ifdef Debug_Mode
     void debug()
     {
         cout<<endl<<"[debug]"<<endl;
@@ -903,12 +919,6 @@ private:
         cout<<"[root block finished]"<<endl;
     }
 
-    /*void ClearBpt()
-    {
-        storage->clearAll();
-        assist->clearAll();
-        root=-1;
-        head=-1;
-    }*/
+#endif
 };
 #endif //BOOKSTORE_BPLUSTREE_H
