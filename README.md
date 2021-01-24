@@ -81,7 +81,7 @@
 
   |           接口           |                    功能                     |
   | :----------------------: | :-----------------------------------------: |
-  |   `Insert(T,MainKey)`    |         插入一个数据，并维护主索引          |
+  |   `Insert(T,MainKey)`    |   插入一个数据，并维护主索引，并选中数据    |
   |    `Delete(MainKey)`     |      根据主值删除，仅维护主值的搜索树       |
   |   `Find(KeyType,Key)`    | 根据提供的`Key`寻找，返回一个对象的`vector` |
   |     `Give(MainKey)`      |              根据主值返回对象               |
@@ -89,14 +89,17 @@
   |     `GiveMainKey()`      |             返回当前对象的主值              |
   |    `Select(MainKey)`     |             选中主值对应的对象              |
   |   `Update(T,MainKey)`    |        更新选中块，同步维护主值索引         |
+  |       `Update(T)`        |          更新选中块，保证主值不变           |
+  |   `Update(MainKey,T)`    |      更新主值对于的块，保证不改变主值       |
   |  `AddKey(keyType,key)`   | 为当前选中的对象增加`key`属性，不能修改主值 |
   | `RemoveKey(keyType,key)` |  删除当前选中对象的`key`属性，不能删除主值  |
+  |      `HaveSelect()`      |             返回当前是否有选中              |
 
 ---
 
 ### *BookManage*
 
-* 含有`FileStorage<BookBlock,ISBN>`对象
+* 含有`FileStorage<BookBlock>`对象
 
 * 含有一个`BookBlock`类，储存某一本书的相关信息，并`operator <`用于`sort`，依据为`ISBN`
 
@@ -104,19 +107,18 @@
 
 * 添加图书相关接口
 
-  |            接口            |                        功能                        |
-  | :------------------------: | :------------------------------------------------: |
-  |     `AddBook(number)`      |               添加选中的书的指定数量               |
-  |    `DeleteBook(number)`    | 删除选中的书的指定数目，返回一个`bool`表示是否成功 |
-  | `DeleteBook(ISBN,number)`  |            删除`ISBN`指定的书的指定数量            |
-  |       `Select(ISBN)`       |     选中书本，若无则创建，返回`id`用于外部存储     |
-  | `UpdateBook(NewBookBlock)` |    删除选中的原书数据，换为新数据,同时更新索引     |
-  |        `GetBook()`         |                  返回选中的块对象                  |
-  |          `show()`          |               展示所有书,`cout`输出                |
-  |    `show(keyType,key)`     |          根据`key`展示所有书，`cout`输出           |
-  |        `memory(id)`        |             给出`id`恢复之前的查找记录             |
-
+  |            接口            |                    功能                     |
+  | :------------------------: | :-----------------------------------------: |
+  |     `AddBook(number)`      |           添加选中的书的指定数量            |
+  |    `DeleteBook(number)`    |           删除选中的书的指定数目            |
+  | `DeleteBook(ISBN,number)`  |        删除`ISBN`指定的书的指定数量         |
+  |       `Select(ISBN)`       |            选中书本，若无则创建             |
+  | `UpdateBook(NewBookBlock)` | 删除选中的原书数据，换为新数据,同时更新索引 |
+  |        `GetBook()`         |              返回选中的块对象               |
+  |          `show()`          |            展示所有书,`cout`输出            |
+  |    `show(keyType,key)`     |       根据`key`展示所有书，`cout`输出       |
   
+
 
 ---
 

@@ -57,6 +57,9 @@ public:
         {
             int newId=dataStorage->add(o);
             bptStorage[0]->insert(mainKey,newId);
+            nowId=newId;
+            nowMainKey=mainKey;
+            nowBlock=o;
         }else
         {
             throw error("repeat mainKey");
@@ -69,6 +72,7 @@ public:
         if(id_vector.size()!=1)throw error("File delete number wrong");
         bptStorage[0]->remove(mainKey,id_vector[0]);
         dataStorage->remove(id_vector[0]);
+        if(mainKey==nowMainKey)nowId=-1;
     }
 
     vector<T> Find(const string &KeyType,const string &key)
@@ -112,6 +116,13 @@ public:
         nowMainKey=MainKey;
     }
 
+    void Select(int select_id,const string &MainKey)
+    {
+        nowId=select_id;
+        nowBlock=dataStorage->get(nowId);
+        nowMainKey=MainKey;
+    }
+
     void Update(const T &o,const string &MainKey)
     {
         if(nowId==-1)throw error("Do not Select in"+nameOfFile);
@@ -129,6 +140,13 @@ public:
                 throw error("repeat mainKey");
             }
         }
+    }
+
+    void Update(const T &o)
+    {
+        if(nowId==-1)throw error("Do not Select in"+nameOfFile);
+        nowBlock=o;
+        dataStorage->update(nowId,o);
     }
 
     void AddKey(const string &KeyType,const string &key)
@@ -157,6 +175,23 @@ public:
             if(w.get()=="BPT remove not found")throw error("FIleStorage find no remove key");
             else throw error(w.get());
         }
+    }
+
+    bool HaveSelect()
+    {
+        if(nowId==-1)return false;
+        else return true;
+    }
+
+    vector<T> GiveAllBlock()
+    {
+        vector<int> tem=bptStorage[0]->giveAllStorage();
+        vector<T> ans;
+        for(auto it:tem)
+        {
+            ans.push_back(dataStorage->get(it));
+        }
+        return ans;
     }
 };
 #endif //BOOKSTORE_FILESTORAGE_H

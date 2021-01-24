@@ -58,7 +58,7 @@ public:
         strcpy(storage,o.c_str());
         return *this;
     }
-    explicit operator string ()
+    explicit operator string ()const
     {
         return string(storage);
     }
