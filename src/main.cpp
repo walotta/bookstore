@@ -1,9 +1,21 @@
+//
+// Created by wzj on 2021/1/25.
+//
 #include <iostream>
+#include "CMD.h"
 
-int main() {
-
-    std::cout<<"Why don't you write any code¿"<<std::endl;
-    std::cout<<"try a try, ac is ok!"<<std::endl;
-
+int main(){
+    CMD bookStoreManager;
+    string cmd;
+    while(getline(cin,cmd))
+    {
+        try
+        {
+            bookStoreManager.run_command(cmd);
+        }catch(const error& o)
+        {
+            cout<<"Invalid\n";
+        }
+    }
     return 0;
 }

@@ -1,15 +1,15 @@
 //
-// Created by wzj on 2021/1/18.
+// Created by wzj on 2021/1/25.
 //
 
-#ifndef BOOKSTORE_LOG_H
-#define BOOKSTORE_LOG_H
+#ifndef LOCAL_TEST_USERLOG_H
+#define LOCAL_TEST_USERLOG_H
 #include <iostream>
 #include <string>
 #include "include/FileStorage.h"
 
 using namespace std;
-class Log
+class UserLog
 {
 private:
     class LogStorage
@@ -17,7 +17,7 @@ private:
     public:
         MyString name;
         MyString cmd;
-        LogStorage()=default;
+        LogStorage()= default;
         explicit LogStorage(const string& _name,const string &_cmd):name(_name),cmd(_cmd){}
     };
     class Size
@@ -32,11 +32,13 @@ private:
     }size;
     StoragePool<LogStorage,Size>* storage;
 public:
-    Log();
-    ~Log();
 
-    void write(const string &UserName, const string &CMD);
+    UserLog();
 
-    void print();
+    ~UserLog();
+
+    void write(const string& UserName,const string& CMD);
+
+    void print(const string& UserName);
 };
-#endif //BOOKSTORE_LOG_H
+#endif //LOCAL_TEST_USERLOG_H

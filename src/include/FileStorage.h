@@ -17,8 +17,9 @@ template<class T>
 class FileStorage
 {
 private:
+    class IsEmpty;
     BPlusTree<Bpt_Size>* bptStorage[6];
-    StoragePool<T,int>* dataStorage;
+    StoragePool<T,IsEmpty>* dataStorage;
     int AmountOfKey=0;
     const string nameOfFile;
     map<string,int> keyMap;
@@ -26,6 +27,15 @@ private:
     int nowId=-1;
     T nowBlock;
     string nowMainKey;
+    class IsEmpty
+    {
+    private:
+        bool a;
+    public:
+        IsEmpty(){a=true;}
+        void activate(){a=false;}
+        bool check(){return a;}
+    }emptyFlag;
 
 public:
 
@@ -40,7 +50,8 @@ public:
             bptStorage[i]=new BPlusTree<Bpt_Size>(nameOfFile+"_"+tem_string);
             keyMap[tem_string]=i;
         }
-        dataStorage=new StoragePool<T,int>("FileStorage_"+nameOfFile);
+        dataStorage=new StoragePool<T,IsEmpty>("FileStorage_"+nameOfFile);
+        emptyFlag=dataStorage->readExtraBlock();
     }
     ~FileStorage()
     {
@@ -48,7 +59,14 @@ public:
         {
             delete bptStorage[i];
         }
+        emptyFlag.activate();
+        dataStorage->writeExtraBlock(emptyFlag);
         delete dataStorage;
+    }
+
+    bool empty()
+    {
+        return emptyFlag.check();
     }
 
     void Insert(const T &o,const string &mainKey)

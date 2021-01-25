@@ -11,7 +11,7 @@ class BookBlock
 public:
     enum KeyType{isbn,name,author,keyword};
     MyString keyStorage[4];
-    int price=-1;
+    double price=-1;
     int quantity=-1;
     bool operator<(const BookBlock& o)
     {
@@ -36,7 +36,7 @@ public:
     void DeleteBook(int number);
 
     //删除ISBN指定的书的指定数量
-    //void DeleteBook(const string& ISBN,int number);
+    void DeleteBook(const string& ISBN,int number);
 
     //选中书本，若无则创建
     void Select(const string& ISBN);
