@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.15)
 project(bookstore)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(bookstore
+add_executable(code
         src/main.cpp
         src/include/BPlusTree.h
         src/include/FileStorage.h
