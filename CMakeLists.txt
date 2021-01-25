@@ -17,4 +17,6 @@ add_executable(code
         src/Log.cpp
         src/Log.h
         src/Finance.cpp
-        src/Finance.h src/include/ErrorMessage.h)
+        src/Finance.h
+        src/include/ErrorMessage.h
+        src/UserLog.cpp)
