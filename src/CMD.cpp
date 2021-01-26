@@ -112,6 +112,7 @@ void CMD::run_command(const string &in)
                 if(name.empty())
                 {
                     tem>>name;
+                    removeMark(name);
                     hasMoreToken(tem);
                 }else
                 {
@@ -123,6 +124,7 @@ void CMD::run_command(const string &in)
                 if(author.empty())
                 {
                     tem>>author;
+                    removeMark(author);
                     hasMoreToken(tem);
                 }else
                 {
@@ -134,6 +136,7 @@ void CMD::run_command(const string &in)
                 if(keyword.empty())
                 {
                     tem>>keyword;
+                    removeMark(keyword);
                     hasMoreToken(tem);
                 }else
                 {
@@ -208,6 +211,7 @@ void CMD::run_command(const string &in)
             userMange.WriteLog("show finance");
         }else
         {
+            //cout<<"[debug]"<<token<<endl;
             if(token[0]=='-')
             {
                 hasMoreToken(ss);
@@ -223,14 +227,17 @@ void CMD::run_command(const string &in)
                 }else if(keyType=="-name")
                 {
                     a>>keyValue;
+                    removeMark(keyValue);
                     bookManege.show("name",keyValue);
                 }else if(keyType=="-author")
                 {
                     a>>keyValue;
+                    removeMark(keyValue);
                     bookManege.show("author",keyValue);
                 }else if(keyType=="-keyword")
                 {
                     a>>keyValue;
+                    removeMark(keyValue);
                     bookManege.show("keyword",keyValue);
                 }else
                 {
@@ -331,4 +338,15 @@ void CMD::run_command(const string &in)
         throw error("command not find");
     }
 
+}
+
+void CMD::removeMark(string &o)
+{
+    if(o[0]!='\"'||o[o.size()-1]!='\"')throw error("remove mark failed not find mark");
+    string tem;
+    for(int i=1;i<o.size()-1;i++)
+    {
+        tem.push_back(o[i]);
+    }
+    o=tem;
 }

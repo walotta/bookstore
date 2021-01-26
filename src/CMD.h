@@ -24,6 +24,7 @@ private:
         t>>a;
         if(!a.empty())throw error("Too many token");
     }
+    void removeMark(string &o);
 public:
     void run_command(const string& in);
 
