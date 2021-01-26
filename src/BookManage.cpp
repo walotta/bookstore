@@ -79,25 +79,40 @@ void BookMange::UpdateBook(const BookBlock &newBlock)
         BookBlock old;
         old=storage->Give();
         storage->Update(newBlock,(string)newBlock.keyStorage[BookBlock::isbn]);
-        if(old.keyStorage[BookBlock::keyword]==newBlock.keyStorage[BookBlock::keyword])return;
 
-        stringstream ss_old;
-        ss_old<<old.keyStorage[BookBlock::keyword];
-        string key_word_old;
-        getline(ss_old,key_word_old,'|');
-        while(!key_word_old.empty())
+        if(old.keyStorage[BookBlock::keyword]!=newBlock.keyStorage[BookBlock::keyword])
         {
-            storage->RemoveKey("keyword",key_word_old);
+            stringstream ss_old;
+            ss_old<<old.keyStorage[BookBlock::keyword];
+            string key_word_old;
+            getline(ss_old,key_word_old,'|');
+            while(!key_word_old.empty())
+            {
+                storage->RemoveKey("keyword",key_word_old);
+            }
+
+
+            stringstream ss;
+            ss<<newBlock.keyStorage[BookBlock::keyword];
+            string key_word_;
+            do
+            {
+                getline(ss,key_word_,'|');
+                storage->AddKey("keyword",key_word_);
+            }while(ss.rdbuf()->in_avail());
+        }
+        if(old.keyStorage[BookBlock::name]!=newBlock.keyStorage[BookBlock::name])
+        {
+            if(old.keyStorage[BookBlock::name]!="")storage->RemoveKey("name",(string)old.keyStorage[BookBlock::name]);
+            storage->AddKey("name",(string)newBlock.keyStorage[BookBlock::name]);
+        }
+        if(old.keyStorage[BookBlock::author]!=newBlock.keyStorage[BookBlock::author])
+        {
+            if(old.keyStorage[BookBlock::author]!="")storage->RemoveKey("author",(string)old.keyStorage[BookBlock::author]);
+            storage->AddKey("author",(string)newBlock.keyStorage[BookBlock::author]);
         }
 
-        stringstream ss;
-        ss<<newBlock.keyStorage[BookBlock::keyword];
-        string key_word_;
-        do
-        {
-            getline(ss,key_word_,'|');
-            storage->AddKey("keyword",key_word_);
-        }while(ss.rdbuf()->in_avail());
+
     }
     else throw error("update book failed because you didn't select");
 }
@@ -118,7 +133,8 @@ void BookMange::show()
         cout<<it.keyStorage[BookBlock::name]<<'\t';
         cout<<it.keyStorage[BookBlock::author]<<'\t';
         cout<<it.keyStorage[BookBlock::keyword]<<'\t';
-        cout<<it.price<<'\t';
+        printf("%.2f\t",it.price);
+        //cout<<it.price<<'\t';
         cout<<it.quantity;
         cout<<"\n";
     }
@@ -135,7 +151,8 @@ void BookMange::show(const string &keyType, const string &key)
         cout<<it.keyStorage[BookBlock::name]<<'\t';
         cout<<it.keyStorage[BookBlock::author]<<'\t';
         cout<<it.keyStorage[BookBlock::keyword]<<'\t';
-        cout<<it.price<<'\t';
+        printf("%.2f\t",it.price);
+        //cout<<it.price<<'\t';
         cout<<it.quantity;
         cout<<"\n";
     }

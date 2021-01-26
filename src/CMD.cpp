@@ -90,7 +90,7 @@ void CMD::run_command(const string &in)
         {
             stringstream tem;
             tem<<token;
-            cout<<"[debug]"<<token<<endl;
+            //cout<<"[debug]"<<token<<endl;
             string check;
             if(token[0]!='-')throw error("modify error");
             getline(tem,check,'=');
@@ -157,6 +157,7 @@ void CMD::run_command(const string &in)
             {
                 throw error("modify error");
             }
+            token="";
             ss>>token;
         }while(ss.rdbuf()->in_avail()!=0);
         BookBlock now=bookManege.GetBook();
@@ -192,6 +193,7 @@ void CMD::run_command(const string &in)
         userMange.WriteLog("import "+(string)bookManege.GetBook().keyStorage[BookBlock::isbn]);
     }else if(token=="show")
     {
+        token="";
         ss>>token;
         if(token=="finance")
         {
@@ -235,6 +237,11 @@ void CMD::run_command(const string &in)
                 }
                 log.write(userMange.NowUserName(),"show book");
                 userMange.WriteLog("show book");
+            }else if(token.empty())
+            {
+                bookManege.show();
+                log.write(userMange.NowUserName(),"show");
+                userMange.WriteLog("show");
             }else
             {
                 throw error("show error");
