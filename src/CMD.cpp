@@ -74,8 +74,8 @@ void CMD::run_command(const string &in)
         string ISBN;
         ss>>ISBN;
         hasMoreToken(ss);
-        log.write(userMange.NowUserName(),"select "+ISBN);
         bookManege.Select(ISBN);
+        log.write(userMange.NowUserName(),"select "+ISBN);
         userMange.WriteLog("select "+ISBN);
     }else if(token=="modify")
     {
@@ -86,10 +86,11 @@ void CMD::run_command(const string &in)
         double price=-1;
         ss>>token;
         if(token.empty())throw error("please enter modify msg");
-        while(!token.empty())
+        do
         {
             stringstream tem;
             tem<<token;
+            cout<<"[debug]"<<token<<endl;
             string check;
             if(token[0]!='-')throw error("modify error");
             getline(tem,check,'=');
@@ -106,7 +107,7 @@ void CMD::run_command(const string &in)
                 }
             }else if(token[1]=='n')
             {
-                if(check!="name")throw error("modify error");
+                if(check!="-name")throw error("modify error");
                 if(name.empty())
                 {
                     tem>>name;
@@ -144,6 +145,7 @@ void CMD::run_command(const string &in)
                 {
                     double a;
                     tem>>a;
+                    //cout<<"[debug]"<<a<<endl;
                     if(a<0)throw error("modify error");
                     price=a;
                     hasMoreToken(tem);
@@ -156,18 +158,27 @@ void CMD::run_command(const string &in)
                 throw error("modify error");
             }
             ss>>token;
-        }
-        if(price==-1)price=0;
+        }while(ss.rdbuf()->in_avail()!=0);
         BookBlock now=bookManege.GetBook();
-        now.price=price;
+        if(now.price==-1&&price==-1)now.price=0;
+        else
+        {
+            if(price!=-1)now.price=price;
+        }
         now.quantity=0;
-        now.keyStorage[BookBlock::isbn]=ISBN;
-        now.keyStorage[BookBlock::name]=name;
-        now.keyStorage[BookBlock::author]=author;
-        now.keyStorage[BookBlock::keyword]=keyword;
+        if(!ISBN.empty())now.keyStorage[BookBlock::isbn]=ISBN;
+        if(!name.empty())now.keyStorage[BookBlock::name]=name;
+        if(!author.empty())now.keyStorage[BookBlock::author]=author;
+        if(!keyword.empty())now.keyStorage[BookBlock::keyword]=keyword;
+        bookManege.UpdateBook(now);
+        bookManege.Select((string)now.keyStorage[BookBlock::isbn]);//todo change
+
+        //cout<<"[debug]"<<endl;
+        //bookManege.show();
+        //cout<<"[debug finish]"<<endl;
+
         log.write(userMange.NowUserName(),"modify "+ISBN);
         userMange.WriteLog("modify "+ISBN);
-        bookManege.UpdateBook(now);
     }else if(token=="import")
     {
         int sum=-1;
@@ -182,7 +193,7 @@ void CMD::run_command(const string &in)
     }else if(token=="show")
     {
         ss>>token;
-        if(token!="finance")
+        if(token=="finance")
         {
             int times=-1;
             ss>>times;

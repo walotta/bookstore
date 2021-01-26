@@ -7,15 +7,18 @@
 CMD bookStoreManager;
 int main(){
     string cmd;
+    int i=0;
     while(getline(cin,cmd))
     {
         try
         {
+            i++;
             bookStoreManager.run_command(cmd);
         }catch(const error& o)
         {
-            cout<<"Invalid\n";
-            //cout<<o.get()<<endl;
+            //cout<<"Invalid\n";
+            cout<<i<<endl;
+            cout<<o.get()<<endl;
         }
     }
     return 0;

@@ -112,6 +112,7 @@ void UserMange::ResetPasswd(const string &name, const string &old_psd,const stri
         if(tem[0].psd!=old_psd)throw error("old psd wrong");
     }
     tem[0].psd=new_psd;
+    storage->Select(name);
     storage->Update(tem[0],name);
     logManage->write((string)now.user.name,"reset passed of "+name);
 }

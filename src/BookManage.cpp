@@ -65,6 +65,7 @@ void BookMange::Select(const string &ISBN)
         BookBlock new_book;
         new_book.keyStorage[BookBlock::isbn]=ISBN;
         storage->Insert(new_book,ISBN);
+        storage->Select(ISBN);
     }else
     {
         storage->Select(ISBN);
@@ -92,18 +93,18 @@ void BookMange::UpdateBook(const BookBlock &newBlock)
         stringstream ss;
         ss<<newBlock.keyStorage[BookBlock::keyword];
         string key_word_;
-        getline(ss,key_word_,'|');
-        while(!key_word_.empty())
+        do
         {
+            getline(ss,key_word_,'|');
             storage->AddKey("keyword",key_word_);
-        }
+        }while(ss.rdbuf()->in_avail());
     }
     else throw error("update book failed because you didn't select");
 }
 
 BookBlock BookMange::GetBook()
 {
-    if(storage->HaveSelect())throw error("give book failed because you didn't select");
+    if(!storage->HaveSelect())throw error("give book failed because you didn't select");
     return storage->Give();
 }
 
