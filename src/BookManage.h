@@ -47,6 +47,8 @@ public:
     //返回选中的块对象
     BookBlock GetBook();
 
+    BookBlock GetBook(const string& ISBN);
+
     //展示所有书,cout输出
     void show();
 

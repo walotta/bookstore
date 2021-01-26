@@ -204,7 +204,6 @@ void CMD::run_command(const string &in)
             int times=-1;
             ss>>times;
             hasMoreToken(ss);
-            if(ss.fail())throw error("show finance wrong");
             if(times==-1)finance.read();
             else finance.read(times);
             log.write(userMange.NowUserName(),"show finance");
@@ -264,6 +263,9 @@ void CMD::run_command(const string &in)
             ss>>ISBN>>sum;
             if(sum==-1)throw error("buy wrong");
             bookManege.DeleteBook(ISBN,sum);
+            double money=bookManege.GetBook(ISBN).price*sum;
+            printf("%.2f\n",money);
+            finance.income(money);
             log.write(userMange.NowUserName(),"buy books");
             userMange.WriteLog("buy books");
         }else

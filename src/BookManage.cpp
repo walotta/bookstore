@@ -158,3 +158,12 @@ void BookMange::show(const string &keyType, const string &key)
     }
     if(list.empty())cout<<'\n';
 }
+
+BookBlock BookMange::GetBook(const string &ISBN)
+{
+    MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
+    BookMange::Select(ISBN);
+    BookBlock ans=BookMange::GetBook();
+    BookMange::Select((string)tem);
+    return ans;
+}

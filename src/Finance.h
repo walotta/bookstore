@@ -38,6 +38,10 @@ private:
         {
             return n-i;
         }
+        bool operator ==(int i)const
+        {
+            return n==i;
+        }
     }size;
     StoragePool<FinanceStorage,Size>* storage;
 
