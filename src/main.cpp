@@ -16,9 +16,9 @@ int main(){
             bookStoreManager.run_command(cmd);
         }catch(const error& o)
         {
-            //cout<<"Invalid\n";
-            cout<<i<<endl;
-            cout<<o.get()<<endl;
+            cout<<"Invalid\n";
+            //cout<<i<<endl;
+            //cout<<o.get()<<endl;
         }
     }
     return 0;
