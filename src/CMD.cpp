@@ -84,6 +84,7 @@ void CMD::run_command(const string &in)
         string author;
         string keyword;
         double price=-1;
+        token="";
         ss>>token;
         if(token.empty())throw error("please enter modify msg");
         do
@@ -159,7 +160,7 @@ void CMD::run_command(const string &in)
             }
             token="";
             ss>>token;
-        }while(ss.rdbuf()->in_avail()!=0);
+        }while(!token.empty());
         BookBlock now=bookManege.GetBook();
         if(now.price==-1&&price==-1)now.price=0;
         else
