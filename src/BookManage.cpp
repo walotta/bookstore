@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <unordered_set>
 
 BookMange::BookMange()
 {
@@ -94,6 +95,18 @@ void BookMange::UpdateBook(const BookBlock &newBlock)
     {
         BookBlock old;
         old=storage->Give();
+
+        stringstream check_ss;
+        check_ss<<newBlock.keyStorage[BookBlock::keyword];
+        string check_str;
+        unordered_set<string> check_set;
+        do
+        {
+            getline(check_ss,check_str,'|');
+            if(check_set.count(check_str)!=0)throw error("repeat keyword");
+            else check_set.insert(check_str);
+        }while(check_ss.rdbuf()->in_avail());
+
         storage->Update(newBlock,(string)newBlock.keyStorage[BookBlock::isbn]);
 
         if(old.keyStorage[BookBlock::keyword]!=newBlock.keyStorage[BookBlock::keyword])
