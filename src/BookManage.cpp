@@ -54,12 +54,12 @@ void BookMange::DeleteBook(const string &ISBN, int number)
     if(storage->HaveSelect())
     {
         MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
-        BookMange::Select(ISBN);
+        BookMange::Select_pure(ISBN);
         BookMange::DeleteBook(number);
-        BookMange::Select((string)tem);
+        BookMange::Select_pure((string)tem);
     }else
     {
-        BookMange::Select(ISBN);
+        BookMange::Select_pure(ISBN);
         BookMange::DeleteBook(number);
         storage->ClearSelect();
     }
@@ -72,6 +72,7 @@ void BookMange::Select(const string &ISBN)
     {
         BookBlock new_book;
         new_book.keyStorage[BookBlock::isbn]=ISBN;
+        new_book.price=0;
         storage->Insert(new_book,ISBN);
         storage->Select(ISBN);
     }else
@@ -97,6 +98,8 @@ void BookMange::UpdateBook(const BookBlock &newBlock)
             while(!key_word_old.empty())
             {
                 storage->RemoveKey("keyword",key_word_old);
+                key_word_old="";
+                getline(ss_old,key_word_old,'|');
             }
 
 
@@ -173,12 +176,12 @@ BookBlock BookMange::GetBook(const string &ISBN)
     if(storage->HaveSelect())
     {
         MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
-        BookMange::Select(ISBN);
+        BookMange::Select_pure(ISBN);
         ans=BookMange::GetBook();
-        BookMange::Select((string)tem);
+        BookMange::Select_pure((string)tem);
     }else
     {
-        BookMange::Select(ISBN);
+        BookMange::Select_pure(ISBN);
         ans=BookMange::GetBook();
         storage->ClearSelect();
     }
@@ -188,4 +191,27 @@ BookBlock BookMange::GetBook(const string &ISBN)
 void BookMange::ClearSelect()
 {
     storage->ClearSelect();
+}
+
+void BookMange::removeMark(string &o)
+{
+    if(o[0]!='\"'||o[o.size()-1]!='\"')throw error("remove mark failed not find mark");
+    string tem;
+    for(int i=1;i<o.size()-1;i++)
+    {
+        tem.push_back(o[i]);
+    }
+    o=tem;
+}
+
+void BookMange::Select_pure(const string &ISBN)
+{
+    vector<BookBlock> f=storage->Find("isbn",ISBN);
+    if(f.empty())
+    {
+        throw error("select not find");
+    }else
+    {
+        storage->Select(ISBN);
+    }
 }

@@ -24,6 +24,7 @@ class BookMange
 private:
     FileStorage<BookBlock>* storage;
     vector<string> KeyList;
+    void removeMark(string &o);
 
 public:
     BookMange();
@@ -56,6 +57,8 @@ public:
     void show(const string& keyType,const string& key);
 
     void ClearSelect();
+
+    void Select_pure(const string& ISBN);
 
 };
 #endif //BOOKSTORE_BOOKMANAGE_H

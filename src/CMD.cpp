@@ -180,7 +180,11 @@ void CMD::run_command(const string &in)
         {
             if(price!=-1)now.price=price;
         }
-        if(!ISBN.empty())now.keyStorage[BookBlock::isbn]=ISBN;
+        if(!ISBN.empty())
+        {
+            if(ISBN==now.keyStorage[BookBlock::isbn])throw error("modify error because repeat ISBN");
+            else now.keyStorage[BookBlock::isbn]=ISBN;
+        }
         if(!name.empty())now.keyStorage[BookBlock::name]=name;
         if(!author.empty())now.keyStorage[BookBlock::author]=author;
         if(!keyword.empty())now.keyStorage[BookBlock::keyword]=keyword;
