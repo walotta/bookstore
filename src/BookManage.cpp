@@ -65,8 +65,9 @@ void BookMange::DeleteBook(const string &ISBN, int number)
     }
 }
 
-void BookMange::Select(const string &ISBN)
+int BookMange::Select(const string &ISBN)
 {
+    int ans;
     vector<BookBlock> f=storage->Find("isbn",ISBN);
     if(f.empty())
     {
@@ -74,11 +75,17 @@ void BookMange::Select(const string &ISBN)
         new_book.keyStorage[BookBlock::isbn]=ISBN;
         new_book.price=0;
         storage->Insert(new_book,ISBN);
-        storage->Select(ISBN);
+        ans=storage->Select(ISBN);
     }else
     {
-        storage->Select(ISBN);
+        ans=storage->Select(ISBN);
     }
+    return ans;
+}
+
+void BookMange::Select(int id)
+{
+    storage->Select(id,(string)storage->Give(id).keyStorage[BookBlock::isbn]);
 }
 
 void BookMange::UpdateBook(const BookBlock &newBlock)

@@ -40,7 +40,9 @@ public:
     void DeleteBook(const string& ISBN,int number);
 
     //选中书本，若无则创建
-    void Select(const string& ISBN);
+    int Select(const string& ISBN);
+
+    void Select(int id);
 
     //删除选中的原书数据，换为新数据,同时更新索引
     void UpdateBook(const BookBlock& newBlock);

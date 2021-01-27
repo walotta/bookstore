@@ -113,6 +113,11 @@ public:
         return dataStorage->get(id);
     }
 
+    T Give(int id)
+    {
+        return dataStorage->get(id);
+    }
+
     T Give()
     {
         if(nowId==-1)throw error("Do not Select in"+nameOfFile);
@@ -125,13 +130,14 @@ public:
         return nowMainKey;
     }
 
-    void Select(const string &MainKey)
+    int Select(const string &MainKey)
     {
         vector<int> ans=bptStorage[0]->find(MainKey);
         if(ans.empty())throw error("Do not find mainKey in"+nameOfFile);
         nowId=ans[0];
         nowBlock=dataStorage->get(nowId);
         nowMainKey=MainKey;
+        return nowId;
     }
 
     void Select(int select_id,const string &MainKey)

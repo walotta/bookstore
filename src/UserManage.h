@@ -26,7 +26,8 @@ private:
     {
     public:
         UserStorage user;
-        string selectBookName;
+        //string selectBookName;
+        int selectBook;
     };
     FileStorage<UserStorage>* storage;
     UserLog *logManage;
@@ -47,7 +48,7 @@ public:
     void ShowLog(const string& username);
     void AskPrivilege(int pri) const;
     void WriteLog(const string& CMD);
-    void ChangeSelectBook(const string& book_name);
-    string GiveSelectBook() const;
+    void ChangeSelectBook(int selectId);
+    int GiveSelectBook() const;
 };
 #endif //BOOKSTORE_USERMANAGE_H

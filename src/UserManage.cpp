@@ -37,7 +37,11 @@ void UserMange::Login(const string &name, const string &psd)
     {
         if(psd!=tem[0].psd)throw error("psd error");
     }
-    now.selectBookName="";
+    if(!stateStorage.empty())
+    {
+        stateStorage.top()=now;
+    }
+    now.selectBook=-1;
     now.user=tem[0];
     stateStorage.push(now);
     memory.insert(name);
@@ -52,7 +56,7 @@ void UserMange::Logout()
     if(stateStorage.empty())
     {
         now.user.privilege=0;
-        now.selectBookName="";
+        now.selectBook=-1;
     }else
     {
         now=stateStorage.top();
@@ -150,15 +154,15 @@ void UserMange::WriteLog(const string &CMD)
     logManage->write((string)now.user.name,CMD);
 }
 
-void UserMange::ChangeSelectBook(const string &book_name)
+void UserMange::ChangeSelectBook(int selectId)
 {
-    now.selectBookName=book_name;
+    now.selectBook=selectId;
 }
 
-string UserMange::GiveSelectBook() const
+int UserMange::GiveSelectBook() const
 {
-    if(now.user.privilege<3)return "";
-    else return (string)now.selectBookName;
+    if(now.user.privilege<3)return -1;
+    else return now.selectBook;
 }
 
 

@@ -21,13 +21,13 @@ void CMD::run_command(const string &in)
         hasMoreToken(ss);
         log.write(userMange.NowUserName(),"su "+name);
         userMange.Login(name,passwd);
-        if(!userMange.GiveSelectBook().empty())bookManege.Select(userMange.GiveSelectBook());
+        if(userMange.GiveSelectBook()!=-1)bookManege.Select(userMange.GiveSelectBook());
     }else if(token=="logout")
     {
         userMange.AskPrivilege(1);
         log.write(userMange.NowUserName(),"logout");
         userMange.Logout();
-        if(userMange.GiveSelectBook().empty())
+        if(userMange.GiveSelectBook()==-1)
         {
             bookManege.ClearSelect();
         }else bookManege.Select(userMange.GiveSelectBook());
@@ -83,7 +83,7 @@ void CMD::run_command(const string &in)
         string ISBN;
         ss>>ISBN;
         hasMoreToken(ss);
-        bookManege.Select(ISBN);
+        userMange.ChangeSelectBook(bookManege.Select(ISBN));
         log.write(userMange.NowUserName(),"select "+ISBN);
         userMange.WriteLog("select "+ISBN);
     }else if(token=="modify")
