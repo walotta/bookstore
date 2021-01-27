@@ -13,12 +13,14 @@ int main(){
         try
         {
             i++;
-            //cout<<i<<endl;
+            cout<<'#'<<i<<' '<<cmd<<endl;
             bookStoreManager.run_command(cmd);
+            cout<<" ! "<<endl;
+            bookStoreManager.run_command("show");
         }catch(const error& o)
         {
-            cout<<"Invalid\n";
-            //cout<<i<<' '<<o.get()<<endl;
+            //cout<<"Invalid\n";
+            cout<<i<<' '<<o.get()<<endl;
         }
     }
     return 0;

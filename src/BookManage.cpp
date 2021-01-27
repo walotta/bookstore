@@ -51,10 +51,18 @@ void BookMange::DeleteBook(int number)
 
 void BookMange::DeleteBook(const string &ISBN, int number)
 {
-    MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
-    BookMange::Select(ISBN);
-    BookMange::DeleteBook(number);
-    BookMange::Select((string)tem);
+    if(storage->HaveSelect())
+    {
+        MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
+        BookMange::Select(ISBN);
+        BookMange::DeleteBook(number);
+        BookMange::Select((string)tem);
+    }else
+    {
+        BookMange::Select(ISBN);
+        BookMange::DeleteBook(number);
+        storage->ClearSelect();
+    }
 }
 
 void BookMange::Select(const string &ISBN)
@@ -161,9 +169,23 @@ void BookMange::show(const string &keyType, const string &key)
 
 BookBlock BookMange::GetBook(const string &ISBN)
 {
-    MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
-    BookMange::Select(ISBN);
-    BookBlock ans=BookMange::GetBook();
-    BookMange::Select((string)tem);
+    BookBlock ans;
+    if(storage->HaveSelect())
+    {
+        MyString tem=(storage->Give()).keyStorage[BookBlock::isbn];
+        BookMange::Select(ISBN);
+        ans=BookMange::GetBook();
+        BookMange::Select((string)tem);
+    }else
+    {
+        BookMange::Select(ISBN);
+        ans=BookMange::GetBook();
+        storage->ClearSelect();
+    }
     return ans;
+}
+
+void BookMange::ClearSelect()
+{
+    storage->ClearSelect();
 }

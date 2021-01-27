@@ -20,12 +20,19 @@ void CMD::run_command(const string &in)
         hasMoreToken(ss);
         log.write(userMange.NowUserName(),"su "+name);
         userMange.Login(name,passwd);
+        if(!userMange.GiveSelectBook().empty())bookManege.Select(userMange.GiveSelectBook());
     }else if(token=="logout")
     {
+        userMange.AskPrivilege(1);
         log.write(userMange.NowUserName(),"logout");
         userMange.Logout();
+        if(userMange.GiveSelectBook().empty())
+        {
+            bookManege.ClearSelect();
+        }else bookManege.Select(userMange.GiveSelectBook());
     }else if(token=="useradd")
     {
+        userMange.AskPrivilege(3);
         string name;
         string passwd;
         int pri;
@@ -55,6 +62,7 @@ void CMD::run_command(const string &in)
         userMange.DeleteUser(name);
     }else if(token=="passwd")
     {
+        userMange.AskPrivilege(1);
         string name;
         string psd1;
         string psd2;
@@ -79,6 +87,7 @@ void CMD::run_command(const string &in)
         userMange.WriteLog("select "+ISBN);
     }else if(token=="modify")
     {
+        userMange.AskPrivilege(3);
         string ISBN;
         string name;
         string author;
@@ -186,21 +195,25 @@ void CMD::run_command(const string &in)
         userMange.WriteLog("modify "+ISBN);
     }else if(token=="import")
     {
+        userMange.AskPrivilege(3);
         int sum=-1;
         double cost_price=-1;
         ss>>sum>>cost_price;
         hasMoreToken(ss);
         if(cost_price<0||sum<0)throw error("wrong number in import");
-        log.write(userMange.NowUserName(),"import "+(string)bookManege.GetBook().keyStorage[BookBlock::isbn]);
         bookManege.AddBook(sum);
+        log.write(userMange.NowUserName(),"import "+(string)bookManege.GetBook().keyStorage[BookBlock::isbn]);
         finance.outcome(cost_price);
         userMange.WriteLog("import "+(string)bookManege.GetBook().keyStorage[BookBlock::isbn]);
+
+        //cout<<"[debug]"<<endl;bookManege.show();cout<<"[debug finish]"<<endl;
     }else if(token=="show")
     {
         token="";
         ss>>token;
         if(token=="finance")
         {
+            userMange.AskPrivilege(7);
             int times=-1;
             ss>>times;
             hasMoreToken(ss);
@@ -210,6 +223,7 @@ void CMD::run_command(const string &in)
             userMange.WriteLog("show finance");
         }else
         {
+            userMange.AskPrivilege(1);
             //cout<<"[debug]"<<token<<endl;
             if(token[0]=='-')
             {
@@ -256,6 +270,7 @@ void CMD::run_command(const string &in)
         }
     }else if(token=="buy")
     {
+        //cout<<"[debug]"<<endl;bookManege.show();cout<<"[debug finish]"<<endl;
         if(userMange.NowPrivilege()>=1)
         {
             string ISBN;
@@ -277,6 +292,7 @@ void CMD::run_command(const string &in)
         ss>>token;
         if(token=="finance")
         {
+            userMange.AskPrivilege(7);
             hasMoreToken(ss);
             if(userMange.NowPrivilege()!=7)throw error("report finance failed");
             finance.print();
@@ -284,6 +300,7 @@ void CMD::run_command(const string &in)
             userMange.WriteLog("report finance");
         }else if(token=="employee")
         {
+            userMange.AskPrivilege(7);
             hasMoreToken(ss);
             if(userMange.NowPrivilege()!=7)throw error("report employee failed");
             cout<<"Please enter the name of the employee you want to seek:"<<endl;
@@ -293,6 +310,7 @@ void CMD::run_command(const string &in)
             log.write(userMange.NowUserName(),"report employee");
         }else if(token=="myself")
         {
+            userMange.AskPrivilege(3);
             userMange.ShowLog();
             log.write(userMange.NowUserName(),"report myself");
         }else
@@ -301,6 +319,7 @@ void CMD::run_command(const string &in)
         }
     }else if(token=="log")
     {
+        userMange.AskPrivilege(7);
         log.print();
         log.write(userMange.NowUserName(),"log");
         userMange.WriteLog("log");

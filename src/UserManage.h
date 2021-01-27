@@ -45,7 +45,9 @@ public:
     string NowUserName() const;
     void ShowLog();
     void ShowLog(const string& username);
-    bool AskPrivilege(int pri) const;
+    void AskPrivilege(int pri) const;
     void WriteLog(const string& CMD);
+    void ChangeSelectBook(const string& book_name);
+    string GiveSelectBook() const;
 };
 #endif //BOOKSTORE_USERMANAGE_H

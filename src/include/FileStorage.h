@@ -145,11 +145,11 @@ public:
     {
         if(nowId==-1)throw error("Do not Select in"+nameOfFile);
         nowBlock=o;
-        dataStorage->update(nowId,o);
         if(MainKey!=nowMainKey)
         {
             if(bptStorage[0]->find(MainKey).empty())
             {
+                dataStorage->update(nowId,o);
                 bptStorage[0]->remove(nowMainKey,nowId);
                 bptStorage[0]->insert(MainKey,nowId);
                 nowMainKey=MainKey;
@@ -157,12 +157,15 @@ public:
             {
                 throw error("repeat mainKey");
             }
+        }else
+        {
+            dataStorage->update(nowId,o);
         }
     }
 
     void Update(const T &o)
     {
-        if(nowId==-1)throw error("Do not Select in"+nameOfFile);
+        if(nowId==-1)throw error("Do not Select in "+nameOfFile);
         nowBlock=o;
         dataStorage->update(nowId,o);
     }
@@ -210,6 +213,11 @@ public:
             ans.push_back(dataStorage->get(it));
         }
         return ans;
+    }
+
+    void ClearSelect()
+    {
+        nowId=-1;
     }
 };
 #endif //BOOKSTORE_FILESTORAGE_H

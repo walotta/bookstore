@@ -52,6 +52,7 @@ void UserMange::Logout()
     if(stateStorage.empty())
     {
         now.user.privilege=0;
+        now.selectBookName="";
     }else
     {
         now=stateStorage.top();
@@ -139,15 +140,25 @@ void UserMange::ShowLog(const string &username)
     logManage->print(username);
 }
 
-bool UserMange::AskPrivilege(int pri) const
+void UserMange::AskPrivilege(int pri) const
 {
-    if(pri<now.user.privilege)return true;
-    return false;
+    if(pri>now.user.privilege)throw error("your pri is too low");
 }
 
 void UserMange::WriteLog(const string &CMD)
 {
     logManage->write((string)now.user.name,CMD);
+}
+
+void UserMange::ChangeSelectBook(const string &book_name)
+{
+    now.selectBookName=book_name;
+}
+
+string UserMange::GiveSelectBook() const
+{
+    if(now.user.privilege<3)return "";
+    else return (string)now.selectBookName;
 }
 
 

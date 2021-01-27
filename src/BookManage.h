@@ -12,7 +12,7 @@ public:
     enum KeyType{isbn,name,author,keyword};
     MyString keyStorage[4];
     double price=-1;
-    int quantity=-1;
+    int quantity=0;
     bool operator<(const BookBlock& o)
     {
         return keyStorage[isbn]<o.keyStorage[isbn];
@@ -55,7 +55,7 @@ public:
     //根据key展示所有书，cout输出
     void show(const string& keyType,const string& key);
 
-
+    void ClearSelect();
 
 };
 #endif //BOOKSTORE_BOOKMANAGE_H
