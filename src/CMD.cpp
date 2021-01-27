@@ -10,8 +10,8 @@ void CMD::run_command(const string &in)
     ss<<in;
     string token;
     ss>>token;
-    if(ss.fail())throw error("read cmd error");
     if(token.empty())return;
+    if(ss.fail())throw error("read cmd error");
     if(token=="su")
     {
         string name;
