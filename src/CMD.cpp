@@ -179,7 +179,6 @@ void CMD::run_command(const string &in)
         {
             if(price!=-1)now.price=price;
         }
-        now.quantity=0;
         if(!ISBN.empty())now.keyStorage[BookBlock::isbn]=ISBN;
         if(!name.empty())now.keyStorage[BookBlock::name]=name;
         if(!author.empty())now.keyStorage[BookBlock::author]=author;
@@ -370,4 +369,14 @@ void CMD::removeMark(string &o)
         tem.push_back(o[i]);
     }
     o=tem;
+}
+
+void CMD::showPri()
+{
+    cout<<userMange.NowPrivilege()<<endl;
+}
+
+void CMD::sudo_show()
+{
+    bookManege.show();
 }

@@ -27,7 +27,7 @@ private:
     void removeMark(string &o);
 public:
     void run_command(const string& in);
-
-    
+    void showPri();
+    void sudo_show();
 };
 #endif //BOOKSTORE_CMD_H
