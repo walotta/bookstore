@@ -20,8 +20,8 @@ int main(){
             //bookStoreManager.sudo_show();
         }catch(const error& o)
         {
-            //cout<<"Invalid\n";
-            cout<<i<<' '<<o.get()<<endl;
+            cout<<"Invalid\n";
+            //cout<<i<<' '<<o.get()<<endl;
         }
     }
     return 0;
