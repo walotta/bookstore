@@ -14,7 +14,11 @@ private:
     public:
         double in;
         double out;
-        FinanceStorage()=default;
+        FinanceStorage()
+        {
+            in=0;
+            out=0;
+        }
         FinanceStorage(double _in,double _out):in(_in),out(_out){}
         FinanceStorage operator-(const FinanceStorage &o)const
         {
@@ -41,6 +45,10 @@ private:
         bool operator ==(int i)const
         {
             return n==i;
+        }
+        explicit operator int() const
+        {
+            return n;
         }
     }size;
     StoragePool<FinanceStorage,Size>* storage;

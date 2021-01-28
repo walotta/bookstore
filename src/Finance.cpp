@@ -47,12 +47,13 @@ void Finance::read()
 
 void Finance::read(int time)
 {
-    if(size-time-1<0)
+    if(size-time<0)
     {
         throw error("show finance number too large");
     }
-    FinanceStorage now=storage->get(size-1);
-    FinanceStorage before=storage->get(size-time-1);
+    FinanceStorage now=storage->get((int)size-1);
+    FinanceStorage before;
+    if(size-time!=0)before=storage->get(size-time-1);
     now=now-before;
     printf("+ %.2f - %.2f\n",now.in,now.out);
 }
