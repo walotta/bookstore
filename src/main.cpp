@@ -13,7 +13,7 @@ int main(){
         try
         {
             i++;
-            //cout<<'#'<<i<<' '<<cmd<<endl;
+            //cout<<'#'<<' '<<cmd<<endl;
             //bookStoreManager.showPri();
             bookStoreManager.run_command(cmd);
             //cout<<" ! "<<endl;

@@ -49,8 +49,7 @@ void Finance::read(int time)
 {
     if(size-time-1<0)
     {
-        Finance::read();
-        return;
+        throw error("show finance number too large");
     }
     FinanceStorage now=storage->get(size-1);
     FinanceStorage before=storage->get(size-time-1);
