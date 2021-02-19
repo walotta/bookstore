@@ -20,6 +20,7 @@ void UserLog::write(const string &UserName, const string &CMD)
 {
     storage->add(LogStorage(UserName,CMD));
     size++;
+    storage->writeExtraBlock(size);
 }
 
 void UserLog::print(const string &UserName)
