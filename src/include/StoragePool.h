@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "cache.hpp"
 using namespace std;
 
 template<class T,class extraBlock>
@@ -20,6 +21,7 @@ private:
     const string dir="StorageFile/";
     //const string dir="";
     const string StorageFileName;
+    cachePool<1000,T> cache;
 
     inline void fileOpen()
     {
@@ -92,6 +94,7 @@ public:
             WritePoint=tem;
         }
         fileClose();
+        cache.insert(ans,block);
         return ans;
     }
 
@@ -102,6 +105,7 @@ public:
         pool.write(reinterpret_cast<const char*>(&WritePoint),sizeof(int));
         fileClose();
         WritePoint=id;
+        cache.remove(id);
     }
 
     void update(int id,const T &block)
@@ -110,15 +114,29 @@ public:
         pool.seekp(base+id*sizeof(T),ios::beg);
         pool.write(reinterpret_cast<const char*>(&block),sizeof(T));
         fileClose();
+        cache.update(id,block);
     }
 
     T get(int id)
     {
-        fileOpen();
+        T tem;
+        int cache_id=cache.find(id);
+        if(cache_id==-1)
+        {
+            fileOpen();
+            pool.seekg(base+id*sizeof(T),ios::beg);
+            pool.read(reinterpret_cast<char*>(&tem),sizeof(T));
+            fileClose();
+            cache.insert(id,tem);
+        }else
+        {
+            tem=cache[cache_id];
+        }
+        /*fileOpen();
         T tem;
         pool.seekg(base+id*sizeof(T),ios::beg);
         pool.read(reinterpret_cast<char*>(&tem),sizeof(T));
-        fileClose();
+        fileClose();*/
         return tem;
     }
 

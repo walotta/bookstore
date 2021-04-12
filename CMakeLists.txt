@@ -19,4 +19,8 @@ add_executable(code
         src/Finance.cpp
         src/Finance.h
         src/include/ErrorMessage.h
-        src/UserLog.cpp)
+        src/UserLog.cpp
+        src/include/HashMap.h
+        src/include/HashMap.cpp
+        src/include/MyString.hpp
+        src/include/cache.hpp)

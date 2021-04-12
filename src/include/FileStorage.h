@@ -5,7 +5,7 @@
 #ifndef BOOKSTORE_FILESTORAGE_H
 #define BOOKSTORE_FILESTORAGE_H
 
-#define Bpt_Size 10
+#define Bpt_Size 300
 
 #include "BPlusTree.h"
 #include "StoragePool.h"

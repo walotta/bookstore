@@ -5,9 +5,6 @@ time_Limit = 30 # s
 import os
 import filecmp
 
-def init(folder):
-    os.system('cp ' + folder + '/code ./')
-    os.system('cp ' + folder + '/clean.sh ./')
 
 def cleanSh():
     os.system('bash ./clean.sh')
@@ -127,9 +124,6 @@ def run_Robust():
     print('Your Robust Test Score is', sum / 5 * 2)
     return sum / 5 * 2
 
-folder = str('')
-init(folder)
-
 Score = 0
 
 Score += run_Basic()
@@ -138,5 +132,4 @@ Score += run_Complex()
 # Score += run_Insider()
 Score += run_Robust()
 
-cleanAll()
 print('Your Total Score is', Score)
